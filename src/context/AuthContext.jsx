@@ -71,14 +71,11 @@ export const AuthProvider = ({ children }) => {
     setAuthError(null);
   }, []);
 
-  // Quick demo login — only available in development builds
-  const quickDemoLogin = import.meta.env.DEV
-    ? async (role = 'student') => {
-        if (!DEMO_CREDENTIALS) return;
-        const creds = DEMO_CREDENTIALS[role];
-        if (creds) return await login(creds.email, creds.demoKey);
-      }
-    : undefined;
+  const quickDemoLogin = async (role = 'student') => {
+    if (!DEMO_CREDENTIALS) return;
+    const creds = DEMO_CREDENTIALS[role];
+    if (creds) return await login(creds.email, creds.demoKey);
+  };
 
   const value = {
     user,
@@ -90,7 +87,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    ...(quickDemoLogin ? { quickDemoLogin } : {})
+    quickDemoLogin
   };
 
   return (

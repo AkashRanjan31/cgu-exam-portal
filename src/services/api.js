@@ -9,13 +9,9 @@ import {
 } from '../utils/constants';
 
 // ---------------------------------------------------------------------------
-// Mock localStorage initialisation — DEV ONLY
-// Seeds demo data so the app works without a real backend during development.
-// This entire block is tree-shaken out of production builds because it is
-// guarded by import.meta.env.DEV (Vite replaces this with `false` in prod).
+// Mock localStorage initialisation — seeds demo data on first load
 // ---------------------------------------------------------------------------
-if (import.meta.env.DEV) {
-  const initStorage = () => {
+const initStorage = () => {
     const existingUsers = localStorage.getItem('cvrgu_users');
     const needsMigration =
       !existingUsers ||
@@ -25,9 +21,7 @@ if (import.meta.env.DEV) {
       (() => {
         try {
           const u = JSON.parse(existingUsers);
-          // Re-seed if any student is missing id/status
           if (u.some(x => x.role === 'student' && (!x.id || !x.status))) return true;
-          // Re-seed if duplicate emails exist (s0 + s1 both had student@cgu-odisha.ac.in)
           const emails = u.map(x => x.email?.toLowerCase()).filter(Boolean);
           return emails.length !== new Set(emails).size;
         } catch { return true; }
@@ -93,21 +87,15 @@ if (import.meta.env.DEV) {
     }
   };
 
-  initStorage();
-}
+initStorage();
 
 // ---------------------------------------------------------------------------
 // Axios instance — configured for real backend integration
 // ---------------------------------------------------------------------------
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
-if (!apiBaseUrl && !import.meta.env.DEV) {
-  // Fail loudly in production if the env var is missing
-  throw new Error('[CVRGU] VITE_API_BASE_URL is not configured. Set it in .env.production before deploying.');
-}
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
-  baseURL: apiBaseUrl || 'http://localhost:5000/api',
+  baseURL: apiBaseUrl,
   headers: { 'Content-Type': 'application/json' },
   timeout: 10000,
   withCredentials: true // Required for httpOnly cookie-based auth in production

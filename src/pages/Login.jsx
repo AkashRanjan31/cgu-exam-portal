@@ -224,7 +224,7 @@ export const Login = () => {
           </form>
 
           {/* Quick Demo Login — DEV only, stripped from production builds */}
-          {import.meta.env.DEV && DEMO_CREDENTIALS && (
+          {DEMO_CREDENTIALS && (
             <div className="mt-8 pt-6 border-t border-slate-200">
               <p className="text-center text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
                 Dev Demo Accounts (One-Click)

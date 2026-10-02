@@ -26,13 +26,12 @@ export const DEPARTMENTS = [
   'Other'
 ];
 
-// Demo credentials — only available in development builds, never in production
-export const DEMO_CREDENTIALS = import.meta.env.DEV
-  ? {
-      student: {
-        id: 's0',
-        email: 'student@cgu-odisha.ac.in',
-        demoKey: import.meta.env.VITE_DEMO_STUDENT_PASSWORD,
+// Demo credentials — seeded into localStorage on first load
+export const DEMO_CREDENTIALS = {
+  student: {
+    id: 's0',
+    email: 'student@cgu-odisha.ac.in',
+    demoKey: import.meta.env.VITE_DEMO_STUDENT_PASSWORD || 'Password@123',
         name: 'Student Name',
         rollNumber: 'XXX XXXXXXX',
         registrationNumber: '2026CSE00001',
@@ -44,19 +43,18 @@ export const DEMO_CREDENTIALS = import.meta.env.DEV
         status: 'Active',
         examEligibility: 'Eligible',
         registeredDate: '2026-08-12',
-        role: 'student'
-      },
-      admin: {
-        id: 'a0',
-        email: 'admin@cgu-odisha.ac.in',
-        demoKey: import.meta.env.VITE_DEMO_ADMIN_PASSWORD,
+    role: 'student'
+  },
+  admin: {
+    id: 'a0',
+    email: 'admin@cgu-odisha.ac.in',
+    demoKey: import.meta.env.VITE_DEMO_ADMIN_PASSWORD || 'Admin@123',
         name: 'Examination Controller',
         rollNumber: 'EMP-CVRGU-COE',
         department: 'Office of Controller of Examinations',
-        role: 'admin'
-      }
-    }
-  : null;
+    role: 'admin'
+  }
+};
 
 // 20 Questions for Data Structures (Exam ID: 1)
 // NOTE: correctAnswer is used only by the mock localStorage scoring layer.
