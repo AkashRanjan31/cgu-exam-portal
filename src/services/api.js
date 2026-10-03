@@ -101,11 +101,11 @@ const api = axios.create({
   withCredentials: true // Required for httpOnly cookie-based auth in production
 });
 
-// Attach JWT from localStorage (dev mock) or rely on httpOnly cookie (production)
+// Attach JWT from sessionStorage (per-tab dev mock) or rely on httpOnly cookie (production)
 api.interceptors.request.use(
   (config) => {
     if (import.meta.env.DEV) {
-      const token = localStorage.getItem('cvrgu_auth_token');
+      const token = sessionStorage.getItem('cvrgu_auth_token');
       if (token) config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -113,15 +113,13 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Handle 401 — clear session and redirect to login
+// Handle 401 — clear this tab's session and redirect to login
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('cvrgu_auth_token');
-      sessionStorage.removeItem('cvrgu_user');
+      sessionStorage.removeItem('cvrgu_auth_token');
       localStorage.removeItem('cvrgu_active_exam');
-      // Only redirect if not already on the login page
       if (!window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }

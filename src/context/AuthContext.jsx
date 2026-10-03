@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authService } from '../services/authService';
+import { authService, SESSION_TOKEN_KEY, SESSION_USER_KEY } from '../services/authService';
 import { DEMO_CREDENTIALS } from '../utils/constants';
 
 const AuthContext = createContext(null);
@@ -24,11 +24,23 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  // Cross-tab logout: if another tab clears the token, log out this tab too
+  // Cross-tab coordination via localStorage events (sessionStorage does not
+  // fire storage events across tabs, so we use a dedicated localStorage signal).
   useEffect(() => {
     const handleStorage = (e) => {
-      if (e.key === 'cvrgu_auth_token' && !e.newValue) {
+      // Another tab called logoutAll — clear this tab's session too
+      if (e.key === 'cvrgu_logout_all' && e.newValue) {
+        sessionStorage.removeItem(SESSION_TOKEN_KEY);
         setUser(null);
+        setAuthError(null);
+      }
+      // Shared user profile was updated by another tab (e.g. admin edit)
+      // Refresh in-memory user if this tab is still authenticated
+      if (e.key === SESSION_USER_KEY && e.newValue) {
+        const token = sessionStorage.getItem(SESSION_TOKEN_KEY);
+        if (token) {
+          try { setUser(JSON.parse(e.newValue)); } catch { /* ignore */ }
+        }
       }
     };
     window.addEventListener('storage', handleStorage);
@@ -71,6 +83,13 @@ export const AuthProvider = ({ children }) => {
     setAuthError(null);
   }, []);
 
+  // Invalidates all sessions on all tabs/devices for this account
+  const logoutAll = useCallback(async () => {
+    await authService.logoutAll();
+    setUser(null);
+    setAuthError(null);
+  }, []);
+
   const quickDemoLogin = async (role = 'student') => {
     if (!DEMO_CREDENTIALS) return;
     const creds = DEMO_CREDENTIALS[role];
@@ -87,6 +106,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    logoutAll,
     quickDemoLogin
   };
 
